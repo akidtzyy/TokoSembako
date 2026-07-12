@@ -8,6 +8,7 @@ import SupplierView from './components/SupplierView';
 import StokView from './components/StokView';
 import LandingPageView from './components/LandingPageView';
 import PopularProductsView from './components/PopularProductsView';
+import PenjualanView from './components/PenjualanView';
 import { db, initDB } from './lib/db';
 
 export default function App() {
@@ -89,6 +90,8 @@ export default function App() {
         return <SupplierView isLoggedIn={isLoggedIn} onNavigate={setActiveTab} />;
       case 'stok':
         return <StokView />;
+      case 'penjualan':
+        return <PenjualanView />;
       default:
         return <DashboardView isLoggedIn={isLoggedIn} onNavigate={setActiveTab} />;
     }

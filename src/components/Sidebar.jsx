@@ -10,7 +10,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Store
+  Store,
+  TrendingUp
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -30,6 +31,7 @@ export default function Sidebar({
     { id: 'barang', name: 'Data Barang', icon: Package, requiresAuth: false },
     { id: 'supplier', name: 'Supplier', icon: Users, requiresAuth: false },
     { id: 'stok', name: 'Stok Barang', icon: Layers, requiresAuth: false },
+    { id: 'penjualan', name: 'Data Penjualan', icon: TrendingUp, requiresAuth: false },
   ];
 
   const handleNavClick = (tabId) => {
@@ -40,22 +42,21 @@ export default function Sidebar({
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100 border-r border-slate-800">
       {/* Brand Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 h-16 gap-2">
-        {/* Hapus overflow-hidden dan ganti dengan min-w-0 flex-1 agar teks bisa fleksibel memakai sisa ruang */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-center justify-between p-4 border-b border-slate-800 h-16">
+        <div className="flex items-center gap-3 overflow-hidden">
           <div className="p-2 bg-blue-600 rounded-lg text-white shrink-0">
             <Store size={22} className="animate-pulse" />
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-base tracking-wider bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent whitespace-nowrap block">
-              SEMBAKO II PERMATA
+            <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent truncate">
+              SEMBAKO JAYA
             </span>
           )}
         </div>
         {/* Collapse Button (Desktop Only) */}
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors shrink-0"
+          className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
         >
           {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>

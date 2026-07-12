@@ -73,15 +73,36 @@ const generateDefaultStocks = () => {
       supplierName,
       stockMin,
       stockActual,
-      lastUpdated: '2025-02-24'
+      lastUpdated: '2026-02-24'
     };
   });
 };
 
 const DEFAULT_STOCKS = generateDefaultStocks();
 
+// High Quality Sales Data spanning January & February 2025
+const DEFAULT_SALES = [
+  { id: 't1', invoice: 'TRX-20260224-001', date: '2026-02-24', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 2, price: 78000, total: 156000 }, { productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 1, price: 38500, total: 38500 }], totalAmount: 194500, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't2', invoice: 'TRX-20260224-002', date: '2026-02-24', items: [{ productId: 'p31', productName: 'Indomie Goreng Spesial Murah', quantity: 10, price: 3100, total: 31000 }, { productId: 'p21', productName: 'Gula Pasir Gulaku Putih Premium 1kg', quantity: 4, price: 17500, total: 70000 }], totalAmount: 101000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
+  { id: 't3', invoice: 'TRX-20260223-001', date: '2026-02-23', items: [{ productId: 'p41', productName: 'Susu Kental Manis Frisian Flag Emas 370g', quantity: 5, price: 12500, total: 62500 }, { productId: 'p4', productName: 'Tepung Terigu Segitiga Biru 1kg', quantity: 3, price: 14500, total: 43500 }], totalAmount: 106000, cashier: 'Dika (Admin)', paymentMethod: 'Transfer Bank' },
+  { id: 't4', invoice: 'TRX-20260222-001', date: '2026-02-22', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 4, price: 78000, total: 312000 }], totalAmount: 312000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't5', invoice: 'TRX-20260221-001', date: '2026-02-21', items: [{ productId: 'p13', productName: 'Minyak Goreng SunCo Higienis 2L', quantity: 2, price: 39500, total: 79000 }, { productId: 'p26', productName: 'Madu Pramuka Alami Bunga Randu 350ml', quantity: 1, price: 75000, total: 75000 }], totalAmount: 154000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
+  { id: 't6', invoice: 'TRX-20260220-001', date: '2026-02-20', items: [{ productId: 'p55', productName: 'Kecap Manis Bango Botol Kedelai Hitam 520ml', quantity: 3, price: 24500, total: 73500 }], totalAmount: 73500, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't7', invoice: 'TRX-20260218-001', date: '2026-02-18', items: [{ productId: 'p63', productName: 'Kopi Kapal Api Special Mix Mantap 165g', quantity: 8, price: 14500, total: 116000 }], totalAmount: 116000, cashier: 'Dika (Admin)', paymentMethod: 'Transfer Bank' },
+  { id: 't8', invoice: 'TRX-20260215-001', date: '2026-02-15', items: [{ productId: 'p4', productName: 'Tepung Terigu Segitiga Biru 1kg', quantity: 5, price: 14500, total: 72500 }, { productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 3, price: 38500, total: 115500 }], totalAmount: 188000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't9', invoice: 'TRX-20260210-001', date: '2026-02-10', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 5, price: 78000, total: 390000 }], totalAmount: 390000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
+  { id: 't10', invoice: 'TRX-20260205-001', date: '2026-02-05', items: [{ productId: 'p43', productName: 'Susu UHT Ultra Milk Full Cream 1L', quantity: 10, price: 18500, total: 185000 }], totalAmount: 185000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  // January 2025 sales
+  { id: 't11', invoice: 'TRX-20260128-001', date: '2026-01-28', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 3, price: 78000, total: 234000 }, { productId: 'p21', productName: 'Gula Pasir Gulaku Putih Premium 1kg', quantity: 5, price: 17500, total: 87500 }], totalAmount: 321500, cashier: 'Dika (Admin)', paymentMethod: 'Transfer Bank' },
+  { id: 't12', invoice: 'TRX-20260125-001', date: '2026-01-25', items: [{ productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 6, price: 38500, total: 231000 }], totalAmount: 231000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't13', invoice: 'TRX-20260120-001', date: '2026-01-20', items: [{ productId: 'p32', productName: 'Indomie Kuah Soto Mie Gurih', quantity: 40, price: 3000, total: 120000 }], totalAmount: 120000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
+  { id: 't14', invoice: 'TRX-20260115-001', date: '2026-01-15', items: [{ productId: 'p46', productName: 'Susu Steril Bear Brand Nestlé 189ml', quantity: 12, price: 10500, total: 126000 }], totalAmount: 126000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
+  { id: 't15', invoice: 'TRX-20260110-001', date: '2026-01-10', items: [{ productId: 'p26', productName: 'Madu Pramuka Alami Bunga Randu 350ml', quantity: 2, price: 75000, total: 150000 }, { productId: 'p65', productName: 'Milo Bubuk Energi Aktif Cokelat 1kg', quantity: 2, price: 84000, total: 168000 }], totalAmount: 318000, cashier: 'Dika (Admin)', paymentMethod: 'Transfer Bank' },
+  { id: 't16', invoice: 'TRX-20260105-001', date: '2026-01-05', items: [{ productId: 'p4', productName: 'Tepung Terigu Segitiga Biru 1kg', quantity: 10, price: 14500, total: 145000 }], totalAmount: 145000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' }
+];
+
 const DEFAULT_ANNOUNCEMENTS = [
-  { id: 'a1', title: 'Promo Sembako Murah', content: 'Diskon 10% untuk pembelian Beras Pandan Wangi setiap hari Jumat Berkah!', date: '2025-02-20', isActive: true },
+  { id: 'a1', title: 'Promo Sembako Murah', content: 'Diskon 10% untuk pembelian Beras Pandan Wangi setiap hari Jumat Berkah!', date: '2026-02-20', isActive: true },
 ];
 
 // Helper to safely access localStorage
@@ -108,6 +129,7 @@ export const initDB = (force = false) => {
     setStorageItem('sembako_products', DEFAULT_PRODUCTS);
     setStorageItem('sembako_suppliers', DEFAULT_SUPPLIERS);
     setStorageItem('sembako_stocks', DEFAULT_STOCKS);
+    setStorageItem('sembako_sales', DEFAULT_SALES);
     setStorageItem('sembako_announcements', DEFAULT_ANNOUNCEMENTS);
     setStorageItem('sembako_auth', { loggedIn: false, user: null });
   }
@@ -231,6 +253,25 @@ export const db = {
       stocks[index].lastUpdated = new Date().toISOString().split('T')[0];
       db.saveStocks(stocks);
     }
+  },
+
+  // Sales (RESTORED & IMPROVED FOR MANAGEMENT)
+  getSales: () => getStorageItem('sembako_sales', DEFAULT_SALES),
+  saveSales: (sales) => setStorageItem('sembako_sales', sales),
+  addSale: (sale) => {
+    const sales = db.getSales();
+    const newSale = {
+      ...sale,
+      id: 't_' + Date.now(),
+      invoice: 'TRX-' + new Date().toISOString().split('T')[0].replace(/-/g, '') + '-' + String(sales.length + 1).padStart(3, '0')
+    };
+    sales.unshift(newSale);
+    db.saveSales(sales);
+    return newSale;
+  },
+  deleteSale: (id) => {
+    const sales = db.getSales().filter(s => s.id !== id);
+    db.saveSales(sales);
   },
 
   // Announcements
