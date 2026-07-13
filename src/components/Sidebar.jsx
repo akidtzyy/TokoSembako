@@ -48,7 +48,7 @@ export default function Sidebar({
             <Store size={22} className="animate-pulse" />
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent truncate">
+            <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent whitespace-normal leading-tight">
               SEMBAKO II PERMATA
             </span>
           )}
