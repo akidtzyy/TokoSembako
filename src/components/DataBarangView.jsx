@@ -61,8 +61,6 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
     'Gula & Pemanis',
     'Mie & Pasta',
     'Susu & Olahan Susu',
-    'Bumbu & Bahan Dapur',
-    'Minuman & Camilan'
   ];
 
   // Form categories (excluding 'Semua')
