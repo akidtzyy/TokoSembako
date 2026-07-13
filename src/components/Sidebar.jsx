@@ -49,7 +49,7 @@ export default function Sidebar({
           </div>
           {!isCollapsed && (
             <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent truncate">
-              SEMBAKO JAYA
+              SEMBAKO II PERMATA
             </span>
           )}
         </div>
