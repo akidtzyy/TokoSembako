@@ -83,9 +83,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
     'Minyak Goreng & Mentega',
     'Gula & Pemanis',
     'Mie & Pasta',
-    'Susu & Olahan Susu',
-    'Bumbu & Bahan Dapur',
-    'Minuman & Camilan'
+    'Susu & Olahan Susu'
   ];
 
   // Reset page ke 1 ketika kategori atau pencarian berubah

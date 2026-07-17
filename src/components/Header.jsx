@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { db } from '../lib/db';
 
-export default function Header({
+export default function SidebarAdmin({
   activeTab,
   setIsMobileOpen,
   isLoggedIn,

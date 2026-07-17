@@ -41,7 +41,7 @@ const DEFAULT_SUPPLIERS = [
   { id: 's4', code: 'SPL-004', name: 'UD Tani Sejahtera', contact: '0821-4433-2211', email: 'tanisejahtera.ud@gmail.com', address: 'Jl. Raya Agro No. 8, Cianjur' }
 ];
 
-// Generate 70 corresponding stock entries automatically linked to the 70 products
+// Generate 23 corresponding stock entries automatically linked to the 23 products
 const generateDefaultStocks = () => {
   return DEFAULT_PRODUCTS.map((prod, index) => {
     let supplierId = 's2';
@@ -80,7 +80,7 @@ const generateDefaultStocks = () => {
 
 const DEFAULT_STOCKS = generateDefaultStocks();
 
-// High Quality Sales Data spanning January & February 2025
+// High Quality Sales Data spanning January & February 2026
 const DEFAULT_SALES = [
   { id: 't1', invoice: 'TRX-20260224-001', date: '2026-02-24', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 2, price: 78000, total: 156000 }, { productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 1, price: 38500, total: 38500 }], totalAmount: 194500, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
   { id: 't2', invoice: 'TRX-20260224-002', date: '2026-02-24', items: [{ productId: 'p31', productName: 'Indomie Goreng Spesial Murah', quantity: 10, price: 3100, total: 31000 }, { productId: 'p21', productName: 'Gula Pasir Gulaku Putih Premium 1kg', quantity: 4, price: 17500, total: 70000 }], totalAmount: 101000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
@@ -92,7 +92,7 @@ const DEFAULT_SALES = [
   { id: 't8', invoice: 'TRX-20260215-001', date: '2026-02-15', items: [{ productId: 'p4', productName: 'Tepung Terigu Segitiga Biru 1kg', quantity: 5, price: 14500, total: 72500 }, { productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 3, price: 38500, total: 115500 }], totalAmount: 188000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
   { id: 't9', invoice: 'TRX-20260210-001', date: '2026-02-10', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 5, price: 78000, total: 390000 }], totalAmount: 390000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
   { id: 't10', invoice: 'TRX-20260205-001', date: '2026-02-05', items: [{ productId: 'p43', productName: 'Susu UHT Ultra Milk Full Cream 1L', quantity: 10, price: 18500, total: 185000 }], totalAmount: 185000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
-  // January 2025 sales
+  // January 2026 sales
   { id: 't11', invoice: 'TRX-20260128-001', date: '2026-01-28', items: [{ productId: 'p1', productName: 'Beras Pandan Wangi Super 5kg', quantity: 3, price: 78000, total: 234000 }, { productId: 'p21', productName: 'Gula Pasir Gulaku Putih Premium 1kg', quantity: 5, price: 17500, total: 87500 }], totalAmount: 321500, cashier: 'Dika (Admin)', paymentMethod: 'Transfer Bank' },
   { id: 't12', invoice: 'TRX-20260125-001', date: '2026-01-25', items: [{ productId: 'p11', productName: 'Minyak Goreng Bimoli Spesial 2L', quantity: 6, price: 38500, total: 231000 }], totalAmount: 231000, cashier: 'Dika (Admin)', paymentMethod: 'Tunai' },
   { id: 't13', invoice: 'TRX-20260120-001', date: '2026-01-20', items: [{ productId: 'p32', productName: 'Indomie Kuah Soto Mie Gurih', quantity: 40, price: 3000, total: 120000 }], totalAmount: 120000, cashier: 'Dika (Admin)', paymentMethod: 'QRIS' },
