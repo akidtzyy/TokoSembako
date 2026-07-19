@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { 
-  Menu, 
-  Bell, 
-  RefreshCw, 
-  Database,
+import React, { useState, useEffect } from 'react';
+import {
+  Menu,
+  Bell,
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
@@ -14,15 +12,19 @@ export default function SidebarAdmin({
   setIsMobileOpen,
   isLoggedIn,
   adminName,
-  onLogout,
-  onResetData
+  onLogout
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // Get low stock count for notifications
-  const stocks = db.getStocks();
-  const lowStockItems = stocks.filter(s => s.stockActual <= s.stockMin);
+  const [lowStockItems, setLowStockItems] = useState([]);
+
+  // Notif Stok Barang Sedikit
+  useEffect(() => {
+    db.getStocks().then(stks => {
+      setLowStockItems(stks.filter(s => s.stockActual <= s.stockMin));
+    }).catch(() => { });
+  }, []);
 
   const getTabTitle = (tab) => {
     switch (tab) {
@@ -37,10 +39,10 @@ export default function SidebarAdmin({
 
   return (
     <header className="bg-white h-16 border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-      
+
       {/* Left side: Hamburger (Mobile) and Page Title */}
       <div className="flex items-center gap-3">
-        <button 
+        <button
           onClick={() => setIsMobileOpen(true)}
           className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600"
         >
@@ -58,26 +60,10 @@ export default function SidebarAdmin({
 
       {/* Right side: Actions, Notifications, Profile */}
       <div className="flex items-center gap-2 md:gap-4">
-        
-        {/* Reset Demo Data Button */}
-        <button
-          onClick={onResetData}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
-          title="Reset semua data ke pengaturan awal pabrik"
-        >
-          <RefreshCw size={14} className="text-slate-500" />
-          <span className="hidden sm:inline">Reset Demo</span>
-        </button>
-
-        {/* Database Status Indicator */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-          <Database size={14} />
-          <span>Local Storage DB</span>
-        </div>
 
         {/* Notifications Dropdown */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors relative"
             title="Pemberitahuan"
@@ -122,7 +108,7 @@ export default function SidebarAdmin({
                   )}
                 </div>
                 <div className="p-2 border-t border-slate-100 bg-slate-50 text-center">
-                  <button 
+                  <button
                     onClick={() => {
                       setShowNotifications(false);
                     }}
@@ -138,7 +124,7 @@ export default function SidebarAdmin({
 
         {/* Profile Dropdown */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-700"
           >
@@ -160,7 +146,7 @@ export default function SidebarAdmin({
                     {isLoggedIn ? 'Administrator' : 'Mode Peninjau'}
                   </p>
                 </div>
-                
+
                 {isLoggedIn ? (
                   <button
                     onClick={() => {

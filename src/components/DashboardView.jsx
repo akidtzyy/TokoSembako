@@ -26,18 +26,21 @@ export default function DashboardView({ isLoggedIn, onNavigate }) {
   const [annContent, setAnnContent] = useState('');
   const [annIsActive, setAnnIsActive] = useState(true);
 
-  const loadData = () => {
-    setProducts(db.getProducts());
-    setSuppliers(db.getSuppliers());
-    setStocks(db.getStocks());
-    setAnnouncements(db.getAnnouncements());
+  const loadData = async () => {
+    const [prods, sups, stks, anns] = await Promise.all([
+      db.getProducts(),
+      db.getSuppliers(),
+      db.getStocks(),
+      db.getAnnouncements(),
+    ]);
+    setProducts(prods);
+    setSuppliers(sups);
+    setStocks(stks);
+    setAnnouncements(anns);
   };
 
   useEffect(() => {
     loadData();
-    // Refresh data every 3 seconds to capture updates
-    const interval = setInterval(loadData, 3000);
-    return () => clearInterval(interval);
   }, []);
 
   // Calculations
@@ -94,7 +97,7 @@ export default function DashboardView({ isLoggedIn, onNavigate }) {
     setShowAnnModal(true);
   };
 
-  const handleSaveAnnouncement = (e) => {
+  const handleSaveAnnouncement = async (e) => {
     e.preventDefault();
     if (!annTitle.trim() || !annContent.trim()) return;
 
@@ -102,7 +105,7 @@ export default function DashboardView({ isLoggedIn, onNavigate }) {
       // Edit
       const existing = announcements.find(a => a.id === annId);
       if (existing) {
-        db.updateAnnouncement({
+        await db.updateAnnouncement({
           ...existing,
           title: annTitle,
           content: annContent,
@@ -111,21 +114,21 @@ export default function DashboardView({ isLoggedIn, onNavigate }) {
       }
     } else {
       // Add
-      db.addAnnouncement({
+      await db.addAnnouncement({
         title: annTitle,
         content: annContent,
         isActive: annIsActive
       });
     }
 
-    loadData();
+    await loadData();
     setShowAnnModal(false);
   };
 
-  const handleDeleteAnnouncement = (id) => {
+  const handleDeleteAnnouncement = async (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
-      db.deleteAnnouncement(id);
-      loadData();
+      await db.deleteAnnouncement(id);
+      await loadData();
     }
   };
 

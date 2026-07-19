@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  Star, 
-  MessageSquare, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Store,
-  Sparkles
+import {
+  ArrowLeft,
+  Star,
+  MessageSquare,
+  CheckCircle2,
+  AlertTriangle,
+  Store
 } from 'lucide-react';
 import { db } from '../lib/db';
 
@@ -15,8 +14,15 @@ export default function PopularProductsView({ onNavigate }) {
   const [stocks, setStocks] = useState([]);
 
   useEffect(() => {
-    setProducts(db.getProducts());
-    setStocks(db.getStocks());
+    const loadData = async () => {
+      const [prods, stks] = await Promise.all([
+        db.getProducts(),
+        db.getStocks(),
+      ]);
+      setProducts(prods);
+      setStocks(stks);
+    };
+    loadData();
   }, []);
 
   // Get only popular products
@@ -40,14 +46,14 @@ export default function PopularProductsView({ onNavigate }) {
 
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      
+
       {/* Navbar Minimalis */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            
+
             {/* Back Button */}
-            <button 
+            <button
               onClick={() => onNavigate('landing')}
               className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer bg-transparent border-0"
             >
@@ -88,7 +94,7 @@ export default function PopularProductsView({ onNavigate }) {
 
       {/* Main Content Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 space-y-8">
-        
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {popularProducts.length === 0 ? (
             <div className="col-span-full py-16 text-center text-slate-400">
@@ -105,18 +111,18 @@ export default function PopularProductsView({ onNavigate }) {
 
               return (
                 <div key={product.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group">
-                  
+
                   {/* Card Image */}
                   <div className="w-full aspect-square bg-slate-50 border-b border-slate-100 overflow-hidden relative">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
+                    <img
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60';
                       }}
                     />
-                    
+
                     {/* Popular Badge */}
                     <div className="absolute top-2 left-2 px-2 py-0.5 bg-amber-500 text-slate-950 font-extrabold text-[9px] rounded-full shadow-xs flex items-center gap-1">
                       <Star size={10} className="fill-slate-950" /> Terpopuler
@@ -166,7 +172,7 @@ export default function PopularProductsView({ onNavigate }) {
                           Stok Habis
                         </button>
                       ) : (
-                        <a 
+                        <a
                           href={getWhatsAppLink(product)}
                           target="_blank"
                           rel="noopener noreferrer"

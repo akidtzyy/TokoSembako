@@ -34,17 +34,19 @@ export default function StokView() {
     supplierId: ''
   });
 
-  const loadData = () => {
-    setStocks(db.getStocks());
-    setSuppliers(db.getSuppliers());
-    setProducts(db.getProducts());
+  const loadData = async () => {
+    const [stks, sups, prods] = await Promise.all([
+      db.getStocks(),
+      db.getSuppliers(),
+      db.getProducts(),
+    ]);
+    setStocks(stks);
+    setSuppliers(sups);
+    setProducts(prods);
   };
 
   useEffect(() => {
     loadData();
-    // Refresh stock data from localStorage
-    const interval = setInterval(loadData, 3000);
-    return () => clearInterval(interval);
   }, []);
 
   // Reset page to 1 when search or status changes
@@ -72,16 +74,15 @@ export default function StokView() {
   const totalPages = Math.ceil(filteredStocks.length / itemsPerPage);
 
   // Quick adjustment of stock level (+/-)
-  const handleQuickAdjust = (stockId, amount) => {
-    const stocksCopy = [...stocks];
-    const index = stocksCopy.findIndex(s => s.id === stockId);
-    if (index !== -1) {
+  const handleQuickAdjust = async (stockId, amount) => {
+    const stockItem = stocks.find(s => s.id === stockId);
+    if (stockItem) {
       const updatedStock = {
-        ...stocksCopy[index],
-        stockActual: Math.max(0, stocksCopy[index].stockActual + amount)
+        ...stockItem,
+        stockActual: Math.max(0, stockItem.stockActual + amount)
       };
-      db.updateStock(updatedStock);
-      loadData();
+      await db.updateStock(updatedStock);
+      await loadData();
     }
   };
 
@@ -104,14 +105,14 @@ export default function StokView() {
     }));
   };
 
-  const handleSaveStock = (e) => {
+  const handleSaveStock = async (e) => {
     e.preventDefault();
     if (!currentStock) return;
 
     const supplier = suppliers.find(s => s.id === formData.supplierId);
     const supplierName = supplier ? supplier.name : 'Tanpa Supplier';
 
-    db.updateStock({
+    await db.updateStock({
       ...currentStock,
       stockMin: formData.stockMin,
       stockActual: formData.stockActual,
@@ -119,7 +120,7 @@ export default function StokView() {
       supplierName
     });
 
-    loadData();
+    await loadData();
     setShowModal(false);
   };
 

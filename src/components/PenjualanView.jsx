@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  Calendar, 
-  DollarSign, 
-  ShoppingBag, 
-  Filter, 
-  RefreshCw, 
-  ChevronRight, 
-  ChevronLeft, 
-  Search, 
-  Printer, 
-  Trash2, 
-  X, 
+import {
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  ShoppingBag,
+  Search,
+  Printer,
+  Trash2,
+  X,
   CheckCircle,
   FileText,
   Plus
@@ -21,7 +17,7 @@ import { db } from '../lib/db';
 export default function PenjualanView() {
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
-  
+
   // Filter States
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -38,9 +34,13 @@ export default function PenjualanView() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
 
-  const loadData = () => {
-    setSales(db.getSales());
-    setProducts(db.getProducts());
+  const loadData = async () => {
+    const [salesData, prodsData] = await Promise.all([
+      db.getSales(),
+      db.getProducts(),
+    ]);
+    setSales(salesData);
+    setProducts(prodsData);
   };
 
   useEffect(() => {
@@ -49,11 +49,11 @@ export default function PenjualanView() {
 
   // Filter Logic
   const filteredSales = sales.filter(sale => {
-    const matchesSearch = sale.invoice.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (sale.cashier && sale.cashier.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+    const matchesSearch = sale.invoice.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (sale.cashier && sale.cashier.toLowerCase().includes(searchQuery.toLowerCase()));
+
     const matchesPayment = paymentFilter === 'Semua' || sale.paymentMethod === paymentFilter;
-    
+
     let matchesDate = true;
     if (startDate) {
       matchesDate = matchesDate && sale.date >= startDate;
@@ -61,7 +61,7 @@ export default function PenjualanView() {
     if (endDate) {
       matchesDate = matchesDate && sale.date <= endDate;
     }
-    
+
     return matchesSearch && matchesPayment && matchesDate;
   });
 
@@ -113,7 +113,7 @@ export default function PenjualanView() {
         amount: finalAmount
       };
     });
-    }
+  }
 
   const dailySales = getDailySalesData();
 
@@ -145,10 +145,10 @@ export default function PenjualanView() {
   };
 
   // Delete transaction / refund
-  const handleDeleteSale = (saleId) => {
+  const handleDeleteSale = async (saleId) => {
     if (confirm('Apakah Anda yakin ingin menghapus data transaksi ini? Tindakan ini tidak dapat dibatalkan.')) {
-      db.deleteSale(saleId);
-      loadData();
+      await db.deleteSale(saleId);
+      await loadData();
     }
   };
 
@@ -156,8 +156,8 @@ export default function PenjualanView() {
   const handleAddToManualCart = (product) => {
     const existing = cart.find(item => item.productId === product.id);
     if (existing) {
-      setCart(cart.map(item => 
-        item.productId === product.id 
+      setCart(cart.map(item =>
+        item.productId === product.id
           ? { ...item, quantity: item.quantity + 1, total: (item.quantity + 1) * item.price }
           : item
       ));
@@ -173,7 +173,7 @@ export default function PenjualanView() {
   };
 
   // Submit manual transaction
-  const handleSaveManualSale = (e) => {
+  const handleSaveManualSale = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
       alert('Keranjang belanja manual masih kosong!');
@@ -181,8 +181,8 @@ export default function PenjualanView() {
     }
 
     const totalAmount = cart.reduce((sum, item) => sum + item.total, 0);
-    
-    db.addSale({
+
+    await db.addSale({
       date: new Date().toISOString().split('T')[0],
       items: cart,
       totalAmount,
@@ -191,11 +191,11 @@ export default function PenjualanView() {
     });
 
     // Deduct stocks physically
-    cart.forEach(item => {
-      db.adjustStockQuantity(item.productId, -item.quantity);
-    });
+    for (const item of cart) {
+      await db.adjustStockQuantity(item.productId, -item.quantity);
+    }
 
-    loadData();
+    await loadData();
     setCart([]);
     setShowAddSaleModal(false);
     alert('Transaksi manual berhasil dicatat & stok terpotong!');
@@ -203,10 +203,10 @@ export default function PenjualanView() {
 
   return (
     <div className="space-y-6">
-      
+
       {/* 1. TOP STATS ROW (KPI SUMMARY) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        
+
         {/* KPI 1: Total Pendapatan */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-all">
           <div className="space-y-1">
@@ -251,7 +251,7 @@ export default function PenjualanView() {
 
       {/* 2. SALES VISUALIZATIONS (DAILY & MONTHLY GRAPH ROW) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Daily Sales Bar Chart (SVG Murni) */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:col-span-2 space-y-4">
           <div className="flex justify-between items-center">
@@ -281,22 +281,22 @@ export default function PenjualanView() {
                 return (
                   <g key={index} className="group">
                     {/* Hover Tooltip/Value */}
-                    <text 
-                      x={x + 15} 
-                      y={y - 8} 
-                      textAnchor="middle" 
+                    <text
+                      x={x + 15}
+                      y={y - 8}
+                      textAnchor="middle"
                       className="text-[9px] font-bold fill-slate-700 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900"
                     >
                       {formatIDR(data.amount)}
                     </text>
-                    
+
                     {/* Bar */}
-                    <rect 
-                      x={x} 
-                      y={y} 
-                      width="30" 
-                      height={Math.max(3, barHeight)} 
-                      rx="4" 
+                    <rect
+                      x={x}
+                      y={y}
+                      width="30"
+                      height={Math.max(3, barHeight)}
+                      rx="4"
                       className="fill-blue-600 hover:fill-blue-700 transition-colors cursor-pointer"
                     />
 
@@ -325,7 +325,7 @@ export default function PenjualanView() {
             {monthlySales.map((m, idx) => {
               const maxAmount = Math.max(...monthlySales.map(d => d.amount)) || 100000;
               const percentage = (m.amount / maxAmount) * 100;
-              
+
               return (
                 <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between items-center text-xs">
@@ -333,7 +333,7 @@ export default function PenjualanView() {
                     <span className="font-extrabold text-slate-900">{formatIDR(m.amount)}</span>
                   </div>
                   <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className={`h-full rounded-full transition-all duration-1000 ${idx === 0 ? 'bg-indigo-500' : 'bg-blue-600'}`}
                       style={{ width: `${Math.max(5, percentage)}%` }}
                     />
@@ -354,15 +354,15 @@ export default function PenjualanView() {
       {/* 3. DATE FILTER & SEARCH PANEL */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-5 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
+
           {/* Filters Form */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-1">
-            
+
             {/* Search Invoice */}
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Cari No. Nota / Kasir..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -373,8 +373,8 @@ export default function PenjualanView() {
             {/* Start Date */}
             <div className="relative">
               <Calendar className="absolute left-3 top-2.5 text-slate-400" size={14} />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
@@ -385,8 +385,8 @@ export default function PenjualanView() {
             {/* End Date */}
             <div className="relative">
               <Calendar className="absolute left-3 top-2.5 text-slate-400" size={14} />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
@@ -410,7 +410,7 @@ export default function PenjualanView() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 self-end md:self-auto">
-            <button 
+            <button
               onClick={() => {
                 setStartDate('');
                 setEndDate('');
@@ -421,7 +421,7 @@ export default function PenjualanView() {
             >
               Reset Filter
             </button>
-            <button 
+            <button
               onClick={() => setShowAddSaleModal(true)}
               className="flex items-center gap-1 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-900/10 cursor-pointer border-0"
             >
@@ -435,7 +435,7 @@ export default function PenjualanView() {
 
       {/* 4. TRANSACTIONS TABLE & BEST SELLERS LIST ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Transactions list table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden lg:col-span-2 p-5 space-y-4">
           <h4 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
@@ -466,18 +466,17 @@ export default function PenjualanView() {
                       <td className="py-3 px-4 font-bold text-slate-800 tracking-wider">{sale.invoice}</td>
                       <td className="py-3 px-4 text-slate-500 font-medium">{sale.date}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                          sale.paymentMethod === 'Tunai' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                          sale.paymentMethod === 'QRIS' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
-                          'bg-indigo-50 text-indigo-700 border border-indigo-100'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${sale.paymentMethod === 'Tunai' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                            sale.paymentMethod === 'QRIS' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                              'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                          }`}>
                           {sale.paymentMethod}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right font-bold text-slate-900">{formatIDR(sale.totalAmount)}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button 
+                          <button
                             onClick={() => {
                               setSelectedSale(sale);
                               setShowReceipt(true);
@@ -486,7 +485,7 @@ export default function PenjualanView() {
                           >
                             <Printer size={12} /> Struk
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteSale(sale.id)}
                             className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer border-0"
                             title="Hapus Transaksi"
@@ -547,13 +546,13 @@ export default function PenjualanView() {
       {showAddSaleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh]">
-            
+
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
               <h3 className="font-bold text-slate-800 text-sm md:text-base">
                 Catat Transaksi Penjualan Baru
               </h3>
-              <button 
+              <button
                 onClick={() => {
                   setShowAddSaleModal(false);
                   setCart([]);
@@ -566,14 +565,14 @@ export default function PenjualanView() {
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-              
+
               {/* Product Selector Column */}
               <div className="space-y-3 flex flex-col max-h-[50vh]">
                 <label className="text-xs font-bold text-slate-600">1. Pilih Produk Sembako</label>
                 <div className="relative shrink-0">
                   <Search className="absolute left-2.5 top-2 text-slate-400" size={14} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Cari produk cepat..."
                     value={manualProductSearch}
                     onChange={(e) => setManualProductSearch(e.target.value)}
@@ -583,8 +582,8 @@ export default function PenjualanView() {
 
                 <div className="border border-slate-200 rounded-xl overflow-y-auto flex-1 divide-y divide-slate-100 p-2 space-y-1 bg-slate-50/50">
                   {products.filter(p => p.name.toLowerCase().includes(manualProductSearch.toLowerCase())).slice(0, 15).map(prod => (
-                    <div 
-                      key={prod.id} 
+                    <div
+                      key={prod.id}
                       onClick={() => handleAddToManualCart(prod)}
                       className="p-2 bg-white hover:bg-blue-50 rounded-lg border border-slate-150 flex justify-between items-center cursor-pointer transition-colors"
                     >
@@ -603,7 +602,7 @@ export default function PenjualanView() {
               {/* Cart & Checkout Column */}
               <div className="space-y-3 flex flex-col justify-between max-h-[50vh]">
                 <label className="text-xs font-bold text-slate-600">2. Keranjang Transaksi</label>
-                
+
                 <div className="border border-slate-200 rounded-xl overflow-y-auto flex-1 divide-y divide-slate-100 p-3 space-y-2 bg-white">
                   {cart.length === 0 ? (
                     <div className="text-center py-12 text-slate-400 text-xs">
@@ -618,7 +617,7 @@ export default function PenjualanView() {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="font-extrabold text-slate-900">{formatIDR(item.total)}</span>
-                          <button 
+                          <button
                             type="button"
                             onClick={() => setCart(cart.filter(i => i.productId !== item.productId))}
                             className="text-rose-500 hover:text-rose-700 font-semibold text-[10px] bg-transparent border-0 cursor-pointer"
@@ -669,13 +668,13 @@ export default function PenjualanView() {
       {showReceipt && selectedSale && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden animate-slide-up">
-            
+
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <span className="font-bold text-slate-700 text-xs flex items-center gap-1.5">
                 <CheckCircle className="text-emerald-500" size={16} /> Nota Transaksi
               </span>
-              <button 
+              <button
                 onClick={() => setShowReceipt(false)}
                 className="p-1 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg cursor-pointer bg-transparent border-0"
               >

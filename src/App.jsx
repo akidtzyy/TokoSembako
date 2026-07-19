@@ -9,20 +9,19 @@ import StokView from './components/StokView';
 import LandingPageView from './components/LandingPageView';
 import PopularProductsView from './components/PopularProductsView';
 import PenjualanView from './components/PenjualanView';
-import { db, initDB } from './lib/db';
+import { db } from './lib/db';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('landing');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  
+
   // Auth state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [adminName, setAdminName] = useState('');
 
-  // Initialize DB and load auth state
+  // Load auth state dari sessionStorage saat mount
   useEffect(() => {
-    initDB();
     const auth = db.getAuth();
     if (auth && auth.loggedIn) {
       setIsLoggedIn(true);
@@ -50,23 +49,11 @@ export default function App() {
 
   // Handle Logout (Fitur Logout pada Halaman Beranda Publik)
   const handleLogout = () => {
-    db.setAuth(false, null);
+    db.logout();
     setIsLoggedIn(false);
     setAdminName('');
-    localStorage.removeItem('sembako_public_cart'); // Clear public cart on logout
+    sessionStorage.removeItem('sembako_public_cart'); // Clear public cart on logout
     setActiveTab('landing'); // Redirect to public store landing page on logout
-  };
-
-  // Reset Demo Data
-  const handleResetData = () => {
-    if (confirm('Apakah Anda yakin ingin mereset seluruh database toko sembako? Tindakan ini akan mengembalikan seluruh produk, stok, supplier, dan pengumuman ke pengaturan bawaan awal.')) {
-      db.resetDB();
-      // Reload current tab
-      const current = activeTab;
-      setActiveTab('dashboard');
-      setTimeout(() => setActiveTab(current), 100);
-      alert('Database toko sembako berhasil di-reset ke data demo bawaan!');
-    }
   };
 
   // Render active component for Admin Dashboard view (removes Penjualan & separate Login Page)
@@ -109,9 +96,9 @@ export default function App() {
           transition={{ duration: 0.2 }}
           className="w-full"
         >
-          <LandingPageView 
-            isLoggedIn={isLoggedIn} 
-            onNavigate={setActiveTab} 
+          <LandingPageView
+            isLoggedIn={isLoggedIn}
+            onNavigate={setActiveTab}
             onLoginSuccess={handleLoginSuccess}
             onLogout={handleLogout}
           />
@@ -140,12 +127,12 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-slate-100 font-sans antialiased text-slate-800">
-      
+
       {/* Sidebar Navigation */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        isCollapsed={isSidebarCollapsed} 
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
         isMobileOpen={isMobileSidebarOpen}
         setIsMobileOpen={setIsMobileSidebarOpen}
@@ -156,15 +143,14 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        
+
         {/* Top Header */}
-        <Header 
-          activeTab={activeTab} 
+        <Header
+          activeTab={activeTab}
           setIsMobileOpen={setIsMobileSidebarOpen}
           isLoggedIn={isLoggedIn}
           adminName={adminName}
           onLogout={handleLogout}
-          onResetData={handleResetData}
         />
 
         {/* Content Body with Transition */}

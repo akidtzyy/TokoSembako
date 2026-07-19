@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  ShoppingBag, 
-  MapPin, 
-  Clock, 
-  Phone, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Lock, 
-  Unlock, 
-  Star, 
-  Percent, 
-  Truck, 
-  ShieldCheck, 
-  ChevronRight, 
+import {
+  Search,
+  ShoppingBag,
+  MapPin,
+  Clock,
+  Phone,
+  CheckCircle2,
+  AlertTriangle,
+  Lock,
+  Unlock,
+  Star,
+  Percent,
+  Truck,
+  ShieldCheck,
+  ChevronRight,
   MessageSquare,
   Sparkles,
   Menu,
@@ -34,7 +34,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
   const [products, setProducts] = useState([]);
   const [stocks, setStocks] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
-  
+
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
@@ -61,12 +61,20 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
   const catalogRef = useRef(null);
 
   useEffect(() => {
-    setProducts(db.getProducts());
-    setStocks(db.getStocks());
-    setAnnouncements(db.getAnnouncements().filter(a => a.isActive));
-    
-    // Load cart from localStorage if exists
-    const savedCart = localStorage.getItem('sembako_public_cart');
+    const loadData = async () => {
+      const [prods, stks, anns] = await Promise.all([
+        db.getProducts(),
+        db.getStocks(),
+        db.getAnnouncements(),
+      ]);
+      setProducts(prods);
+      setStocks(stks);
+      setAnnouncements(anns.filter(a => a.isActive));
+    };
+    loadData();
+
+    // Load cart from sessionStorage if exists
+    const savedCart = sessionStorage.getItem('sembako_public_cart');
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
@@ -74,7 +82,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
   const saveCart = (newCart) => {
     setCart(newCart);
-    localStorage.setItem('sembako_public_cart', JSON.stringify(newCart));
+    sessionStorage.setItem('sembako_public_cart', JSON.stringify(newCart));
   };
 
   const categories = [
@@ -93,8 +101,8 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
   // Filter products for the main catalog
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -150,8 +158,8 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
         alert(`Maaf, stok fisik terbatas hanya tinggal ${maxStock} ${product.unit}.`);
         return;
       }
-      newCart = cart.map(item => 
-        item.productId === product.id 
+      newCart = cart.map(item =>
+        item.productId === product.id
           ? { ...item, quantity: item.quantity + 1, total: (item.quantity + 1) * item.price }
           : item
       );
@@ -248,7 +256,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
     // Encode message for WhatsApp URL
     const waUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
-    
+
     // Redirect to WhatsApp
     window.open(waUrl, '_blank');
 
@@ -268,9 +276,9 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
     // Simulate connection delay (perfect for eventual XAMPP MySQL setup)
     setTimeout(() => {
       setLoginLoading(false);
-      
+
       const usernameLower = loginUsername.toLowerCase();
-      
+
       if (usernameLower === 'admin' && loginPassword === 'admin123') {
         // Login sebagai Admin -> dialihkan ke panel admin
         onLoginSuccess(loginUsername, 'Dika (Admin)');
@@ -293,12 +301,12 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      
+
       {/* 1. PUBLIC NAVBAR */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            
+
             {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="p-2 bg-blue-600 rounded-xl text-white">
@@ -317,16 +325,16 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               <button onClick={scrollToCatalog} className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer bg-transparent border-0">
                 Katalog Harga
               </button>
-                {/* FIX: Mengarahkan langsung ke page PopularProductsView */}
-              <button 
-                onClick={() => onNavigate('popular-products')} 
+              {/* FIX: Mengarahkan langsung ke page PopularProductsView */}
+              <button
+                onClick={() => onNavigate('popular-products')}
                 className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer bg-transparent border-0"
               >
                 Produk Terpopuler
               </button>
-              
+
               {/* Cart Status Icon */}
-              <button 
+              <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer bg-transparent border-0"
                 title="Keranjang Belanja"
@@ -340,16 +348,16 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               </button>
 
               <span className="h-4 w-px bg-slate-200" />
-              
+
               {isLoggedIn ? (
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
                     Halo, {currentUserObj?.name || 'Pelanggan'}
                   </span>
-                  
+
                   {/* HANYA ADMIN yang bisa melihat dan mengakses tombol Admin Panel */}
                   {isCurrentUserAdmin && (
-                    <button 
+                    <button
                       onClick={() => onNavigate('dashboard')}
                       className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer border-0"
                     >
@@ -359,7 +367,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                   )}
 
                   {/* Tombol LOGOUT pada Halaman Beranda Publik */}
-                  <button 
+                  <button
                     onClick={onLogout}
                     className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition-all cursor-pointer border-0"
                     title="Keluar dari Akun"
@@ -369,7 +377,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                   </button>
                 </div>
               ) : (
-                <button 
+                <button
                   onClick={() => setShowLoginModal(true)}
                   className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-900/10 cursor-pointer border-0"
                 >
@@ -381,7 +389,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
             {/* Mobile Menu Button & Mobile Cart */}
             <div className="flex items-center gap-2 md:hidden">
-              <button 
+              <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-700 bg-transparent border-0 cursor-pointer"
               >
@@ -393,7 +401,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                 )}
               </button>
 
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 bg-transparent border-0 cursor-pointer"
               >
@@ -407,45 +415,45 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3 shadow-inner">
-            <button 
+            <button
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setMobileMenuOpen(false);
-              }} 
+              }}
               className="w-full text-left py-2 text-sm font-bold text-slate-700 hover:text-blue-600 block bg-transparent border-0 cursor-pointer"
             >
               Beranda
             </button>
-            <button 
+            <button
               onClick={() => {
                 scrollToCatalog();
                 setMobileMenuOpen(false);
-              }} 
+              }}
               className="w-full text-left py-2 text-sm font-bold text-slate-700 hover:text-blue-600 block bg-transparent border-0 cursor-pointer"
             >
               Katalog Harga
             </button>
-            <button 
+            <button
               onClick={() => {
                 onNavigate('popular-products');
                 setMobileMenuOpen(false);
-              }} 
+              }}
               className="w-full text-left py-2 text-sm font-bold text-slate-700 hover:text-blue-600 block bg-transparent border-0 cursor-pointer"
             >
               Produk Terpopuler
             </button>
-            
+
             <div className="h-px bg-slate-100 my-2" />
-            
+
             {isLoggedIn ? (
               <div className="space-y-2">
                 <div className="text-center text-xs font-semibold text-slate-500 bg-slate-100 py-1.5 rounded-lg">
                   Halo, {currentUserObj?.name || 'Pelanggan'}
                 </div>
-                
+
                 {/* HANYA ADMIN yang bisa melihat tombol Admin Panel di Mobile */}
                 {isCurrentUserAdmin && (
-                  <button 
+                  <button
                     onClick={() => {
                       onNavigate('dashboard');
                       setMobileMenuOpen(false);
@@ -458,7 +466,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                 )}
 
                 {/* Tombol LOGOUT Mobile */}
-                <button 
+                <button
                   onClick={() => {
                     onLogout();
                     setMobileMenuOpen(false);
@@ -470,7 +478,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                 </button>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={() => {
                   setShowLoginModal(true);
                   setMobileMenuOpen(false);
@@ -501,9 +509,9 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       <section className="relative bg-slate-900 text-white py-16 md:py-24 overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="/images/grocery-hero.webp" 
-            alt="Grocery Store Background" 
+          <img
+            src="/images/grocery-hero.webp"
+            alt="Grocery Store Background"
             className="w-full h-full object-cover opacity-25 object-center"
             onError={(e) => {
               e.target.style.display = 'none';
@@ -513,7 +521,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6 md:space-y-8">
-          
+
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full text-blue-300 text-xs font-bold">
             <Sparkles size={12} />
@@ -535,15 +543,15 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
           <form onSubmit={handleHeroSearch} className="max-w-xl bg-white p-2 rounded-2xl shadow-2xl border border-white/10 flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 text-slate-400" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Cari Beras, Minyak, Gula, Tepung..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 text-slate-800 text-sm bg-transparent focus:outline-none placeholder-slate-400"
               />
             </div>
-            <button 
+            <button
               type="submit"
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shrink-0 cursor-pointer border-0"
             >
@@ -578,7 +586,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       <section className="py-12 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            
+
             <div className="p-5 space-y-2 rounded-2xl hover:bg-slate-50 transition-colors">
               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Percent size={22} />
@@ -616,7 +624,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {/* 5. POPULAR PRODUCTS (TERPOPULER) */}
       <section className="py-16 bg-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          
+
           <div className="flex justify-between items-end">
             <div className="space-y-1">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -626,7 +634,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               <p className="text-xs text-slate-500">Paling banyak dibeli oleh pelanggan rumah tangga maupun warung makan.</p>
             </div>
             {/* FIX: Klik untuk lihat semua mengarahkan ke page PopularProductsView */}
-            <button 
+            <button
               onClick={() => onNavigate('popular-products')}
               className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-0"
             >
@@ -645,8 +653,8 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                   <div className="space-y-2">
                     {/* Image */}
                     <div className="w-full aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-100 relative">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
@@ -678,9 +686,9 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                       <span className="font-extrabold text-blue-700 text-xs">{formatIDR(product.price)}</span>
                       <span className="text-[9px] text-slate-400">{product.unit}</span>
                     </div>
-                    
+
                     {/* Add to Cart Button */}
-                    <button 
+                    <button
                       onClick={() => handleAddToCart(product)}
                       className="w-full py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 rounded-lg text-[10px] font-bold text-center transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
@@ -699,7 +707,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {/* 6. MAIN CATALOG WITH DETAILED PRICE LIST & PAGINATION (10 ITEMS PER PAGE) */}
       <section ref={catalogRef} className="py-16 bg-white scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          
+
           {/* Section Header */}
           <div className="text-center space-y-2 max-w-2xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -712,12 +720,12 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
           {/* Search & Category Tabs */}
           <div className="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            
+
             {/* Search input */}
             <div className="relative max-w-xl mx-auto">
               <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Ketik nama sembako yang ingin dicari (contoh: minyak, beras, terigu)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -731,11 +739,10 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-0 ${
-                    selectedCategory === cat
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-0 ${selectedCategory === cat
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -761,18 +768,18 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
                 return (
                   <div key={product.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group">
-                    
+
                     {/* Card Media */}
                     <div className="w-full aspect-square bg-slate-50 border-b border-slate-100 overflow-hidden relative">
-                      <img 
-                        src={product.image} 
-                        alt={product.name} 
+                      <img
+                        src={product.image}
+                        alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60';
                         }}
                       />
-                      
+
                       {/* Stock Status Tag */}
                       <div className="absolute bottom-2 left-2 flex gap-1">
                         {isOutOfStock ? (
@@ -817,7 +824,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                             Stok Habis
                           </button>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => handleAddToCart(product)}
                             className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-blue-900/10 border-0"
                           >
@@ -840,15 +847,14 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${
-                  currentPage === 1 
-                    ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
+                className={`p-2 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${currentPage === 1
+                    ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
                     : 'bg-white text-slate-600 hover:bg-slate-50 cursor-pointer'
-                }`}
+                  }`}
               >
                 <ChevronLeft size={16} />
               </button>
-              
+
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
@@ -857,11 +863,10 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                       setCurrentPage(page);
                       scrollToCatalog();
                     }}
-                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${
-                      currentPage === page
+                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${currentPage === page
                         ? 'bg-blue-600 text-white shadow-md shadow-blue-900/10'
                         : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -871,11 +876,10 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${
-                  currentPage === totalPages 
-                    ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
+                className={`p-2 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${currentPage === totalPages
+                    ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
                     : 'bg-white text-slate-600 hover:bg-slate-50 cursor-pointer'
-                }`}
+                  }`}
               >
                 <ChevronRight size={16} />
               </button>
@@ -888,7 +892,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {/* 7. LATEST PRODUCTS (PRODUK TERBARU) */}
       <section className="py-16 bg-slate-50 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          
+
           <div className="text-center space-y-1">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
               <Sparkles className="text-blue-600" size={20} />
@@ -905,9 +909,9 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               return (
                 <div key={product.id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs hover:shadow-md transition-all flex gap-4 items-center group">
                   <div className="w-20 h-20 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shrink-0 relative">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
+                    <img
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60';
@@ -922,7 +926,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                     <p className="font-extrabold text-blue-700 text-xs">{formatIDR(product.price)}</p>
                     <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1">
                       <span>Stok: {stockActual} {product.unit}</span>
-                      <button 
+                      <button
                         onClick={() => handleAddToCart(product)}
                         className="text-blue-600 font-bold hover:underline bg-transparent border-0 cursor-pointer text-xs"
                       >
@@ -942,21 +946,21 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           {/* Overlay */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsCartOpen(false)}
           />
 
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
             <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-full">
-              
+
               {/* Drawer Header */}
               <div className="px-4 py-5 bg-slate-50 border-b border-slate-200 sm:px-6 flex justify-between items-center">
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                   <ShoppingCart className="text-blue-600" size={20} />
                   Keranjang Belanja Anda ({cartTotalItems})
                 </h3>
-                <button 
+                <button
                   onClick={() => setIsCartOpen(false)}
                   className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 bg-transparent border-0 cursor-pointer"
                 >
@@ -982,17 +986,17 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-bold text-slate-800 truncate">{item.productName}</h4>
                           <p className="text-[10px] text-slate-500 mt-0.5">{formatIDR(item.price)} / {item.unit}</p>
-                          
+
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-1.5 mt-2">
-                            <button 
+                            <button
                               onClick={() => handleAdjustCartQuantity(item.productId, -1)}
                               className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 bg-transparent border-0 cursor-pointer"
                             >
                               <Minus size={10} />
                             </button>
                             <span className="text-xs font-bold text-slate-800 w-6 text-center">{item.quantity}</span>
-                            <button 
+                            <button
                               onClick={() => handleAdjustCartQuantity(item.productId, 1)}
                               className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 bg-transparent border-0 cursor-pointer"
                             >
@@ -1004,7 +1008,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                         {/* Total per item & Delete */}
                         <div className="text-right shrink-0 min-w-[80px]">
                           <p className="text-xs font-extrabold text-slate-900">{formatIDR(item.total)}</p>
-                          <button 
+                          <button
                             onClick={() => handleRemoveFromCart(item.productId)}
                             className="text-rose-500 hover:text-rose-700 text-[10px] font-bold mt-1 bg-transparent border-0 cursor-pointer"
                           >
@@ -1020,7 +1024,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               {/* Checkout Form (WhatsApp Checkout) */}
               {cart.length > 0 && (
                 <div className="border-t border-slate-200 p-4 bg-slate-50 space-y-4">
-                  
+
                   {/* Totals Summary */}
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between font-medium text-slate-600">
@@ -1037,8 +1041,8 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                   <form onSubmit={handleWhatsAppCheckout} className="space-y-3">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-600 uppercase">Nama Lengkap Pemesan</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder="Contoh: Ibu Ani"
@@ -1049,7 +1053,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-600 uppercase">Alamat Kirim / Catatan (Opsional)</label>
-                      <textarea 
+                      <textarea
                         value={customerAddress}
                         onChange={(e) => setCustomerAddress(e.target.value)}
                         placeholder="Contoh: Perumahan Graha Indah Blok C-4, Jakarta Selatan..."
@@ -1059,7 +1063,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                     </div>
 
                     <div className="flex gap-2 pt-2">
-                      <button 
+                      <button
                         type="button"
                         onClick={handleClearCart}
                         className="px-3 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 cursor-pointer bg-white"
@@ -1089,13 +1093,13 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-slide-up">
-            
+
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
                 <Lock className="text-blue-600" size={16} /> Portal Masuk Toko Sembako
               </span>
-              <button 
+              <button
                 onClick={() => {
                   setShowLoginModal(false);
                   setLoginError(null);
@@ -1108,7 +1112,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
 
             {/* Modal Body / Login Form */}
             <div className="p-6 space-y-4">
-              
+
               {/* Logo Branding inside Modal */}
               <div className="text-center space-y-1">
                 <div className="inline-flex p-2.5 bg-blue-600 rounded-xl text-white shadow-md shadow-blue-600/10 mb-2">
@@ -1126,12 +1130,12 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
               )}
 
               <form onSubmit={handleModalLoginSubmit} className="space-y-4">
-                
+
                 {/* Username */}
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Username</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={loginUsername}
                     onChange={(e) => setLoginUsername(e.target.value)}
                     placeholder="Masukkan username (admin / user)..."
@@ -1144,8 +1148,8 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
                 {/* Password */}
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="Masukkan password..."
@@ -1216,7 +1220,7 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
       {/* 9. FOOTER / CONTACT SECTION */}
       <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
-          
+
           {/* Col 1: Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -1278,12 +1282,12 @@ export default function LandingPageView({ isLoggedIn, onNavigate, onLoginSuccess
             <div className="flex flex-col gap-2">
               {/* Wadah Peta Embed */}
               <div className="h-28 w-full bg-slate-800 rounded-xl overflow-hidden border border-slate-700">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.681544900202!2d101.48129797472347!3d0.47442369952093427!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d5afabe915c9f5%3A0x44dadc389ec6460f!2sIndomaret%20%7C%20Tengkerang%20Labuai%20-%20Kota%20Pekanbaru!5e0!3m2!1sid!2sid!4v1783852785178!5m2!1sid!2sid" 
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.681544900202!2d101.48129797472347!3d0.47442369952093427!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d5afabe915c9f5%3A0x44dadc389ec6460f!2sIndomaret%20%7C%20Tengkerang%20Labuai%20-%20Kota%20Pekanbaru!5e0!3m2!1sid!2sid!4v1783852785178!5m2!1sid!2sid"
                   className="w-full h-full filter grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
-                  style={{ border: 0 }} 
-                  allowFullScreen="" 
-                  loading="lazy" 
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
               </div>

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Download, 
-  Printer, 
-  X, 
-  Package, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Download,
+  Printer,
+  X,
+  Package,
   Image as ImageIcon,
   AlertCircle,
   ChevronLeft,
@@ -20,7 +19,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -40,8 +39,9 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
   });
 
   // Load products
-  const loadProducts = () => {
-    setProducts(db.getProducts());
+  const loadProducts = async () => {
+    const prods = await db.getProducts();
+    setProducts(prods);
   };
 
   useEffect(() => {
@@ -70,8 +70,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
   // Filter & Search products
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -137,7 +137,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
     }
   };
 
-  const handleSaveProduct = (e) => {
+  const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || formData.price <= 0 || formData.cost <= 0) {
       alert('Mohon isi nama barang, harga beli, dan harga jual yang valid!');
@@ -155,24 +155,24 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
     if (currentProduct) {
       // Edit
-      db.updateProduct({
+      await db.updateProduct({
         ...currentProduct,
         ...formData,
         image: imageToSave
       });
     } else {
       // Create
-      db.addProduct({
+      await db.addProduct({
         ...formData,
         image: imageToSave
       });
     }
 
-    loadProducts();
+    await loadProducts();
     setShowModal(false);
   };
 
-  const handleDeleteProduct = (id) => {
+  const handleDeleteProduct = async (id) => {
     if (!isLoggedIn) {
       alert('Anda harus login sebagai admin untuk menghapus barang!');
       onNavigate('landing');
@@ -180,8 +180,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
     }
 
     if (confirm('Apakah Anda yakin ingin menghapus produk ini? Semua data stok terkait juga akan terhapus.')) {
-      db.deleteProduct(id);
-      loadProducts();
+      await db.deleteProduct(id);
+      await loadProducts();
     }
   };
 
@@ -197,10 +197,10 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
   // Mock Export CSV
   const handleExportCSV = () => {
     const headers = 'Kode Barang,Nama Barang,Kategori,Harga Beli,Harga Jual,Satuan\n';
-    const rows = filteredProducts.map(p => 
+    const rows = filteredProducts.map(p =>
       `"${p.code}","${p.name}","${p.category}",${p.cost},${p.price},"${p.unit}"`
     ).join('\n');
-    
+
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -219,18 +219,18 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
   return (
     <div className="space-y-6">
-      
+
       {/* 1. TOP CONTROLS & SEARCH */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-5 shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
+
           {/* Left: Search & Category Filter */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-2xl">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Cari nama barang atau kode SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -240,7 +240,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
             {/* Category Select */}
             <div className="relative min-w-[180px]">
-              <select 
+              <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 appearance-none cursor-pointer font-medium text-slate-700"
@@ -254,7 +254,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 self-end md:self-auto">
-            <button 
+            <button
               onClick={handleExportCSV}
               className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               title="Ekspor ke Excel/CSV"
@@ -262,7 +262,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <Download size={14} />
               <span>Ekspor</span>
             </button>
-            <button 
+            <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               title="Cetak Daftar Barang"
@@ -270,7 +270,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <Printer size={14} />
               <span>Cetak</span>
             </button>
-            <button 
+            <button
               onClick={() => handleOpenModal()}
               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-bold shadow-md shadow-blue-900/10 transition-colors cursor-pointer"
             >
@@ -288,7 +288,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <AlertCircle size={16} className="text-amber-500" />
               Anda berada dalam <strong>Mode Peninjau (Tamu)</strong>. Anda dapat melihat, menambah, dan mengedit data, namun fitur hapus memerlukan login admin.
             </span>
-            <button 
+            <button
               onClick={() => onNavigate('landing')}
               className="text-blue-600 font-bold hover:underline shrink-0 cursor-pointer"
             >
@@ -300,7 +300,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
       {/* 2. PRODUCTS TABLE / GRID */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
-        
+
         {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
@@ -329,8 +329,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
                   <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
-                        <img 
-                          src={product.image} 
+                        <img
+                          src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -361,20 +361,19 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button 
+                        <button
                           onClick={() => handleOpenModal(product)}
                           className="p-1.5 bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-lg transition-colors border border-slate-200 hover:border-blue-200 cursor-pointer"
                           title="Edit Barang"
                         >
                           <Edit size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteProduct(product.id)}
-                          className={`p-1.5 rounded-lg transition-colors border cursor-pointer ${
-                            isLoggedIn 
-                              ? 'bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border-slate-200 hover:border-rose-200' 
-                              : 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
-                          }`}
+                          className={`p-1.5 rounded-lg transition-colors border cursor-pointer ${isLoggedIn
+                            ? 'bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border-slate-200 hover:border-rose-200'
+                            : 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
+                            }`}
                           title={isLoggedIn ? "Hapus Barang" : "Hapus Barang (Butuh Login)"}
                         >
                           <Trash2 size={14} />
@@ -400,8 +399,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <div key={product.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
                 <div className="flex gap-3">
                   <div className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
-                    <img 
-                      src={product.image} 
+                    <img
+                      src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -433,21 +432,20 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
                   <span className="text-xs text-slate-500">
                     Satuan: <strong className="text-slate-800">{product.unit}</strong>
                   </span>
-                  
+
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => handleOpenModal(product)}
                       className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg text-xs font-semibold border border-slate-200 transition-colors cursor-pointer"
                     >
                       <Edit size={12} /> Edit
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
-                        isLoggedIn
-                          ? 'bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border-slate-200 hover:border-rose-200'
-                          : 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
-                      }`}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${isLoggedIn
+                        ? 'bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border-slate-200 hover:border-rose-200'
+                        : 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
+                        }`}
                     >
                       <Trash2 size={12} /> Hapus
                     </button>
@@ -464,30 +462,28 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
             <div>
               Menampilkan <span className="font-bold text-slate-700">{indexOfFirstItem + 1}</span> sampai <span className="font-bold text-slate-700">{Math.min(indexOfLastItem, filteredProducts.length)}</span> dari <span className="font-bold text-slate-700">{filteredProducts.length}</span> produk sembako
             </div>
-            
+
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className={`p-1.5 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${
-                  currentPage === 1 
-                    ? 'bg-slate-100 text-slate-300 cursor-not-allowed' 
-                    : 'bg-white text-slate-600 hover:bg-slate-100 cursor-pointer'
-                }`}
+                className={`p-1.5 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${currentPage === 1
+                  ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 cursor-pointer'
+                  }`}
               >
                 <ChevronLeft size={14} />
               </button>
-              
+
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-7 h-7 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${
-                      currentPage === page
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                    }`}
+                    className={`w-7 h-7 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${currentPage === page
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                      }`}
                   >
                     {page}
                   </button>
@@ -497,11 +493,10 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className={`p-1.5 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${
-                  currentPage === totalPages 
-                    ? 'bg-slate-100 text-slate-300 cursor-not-allowed' 
-                    : 'bg-white text-slate-600 hover:bg-slate-100 cursor-pointer'
-                }`}
+                className={`p-1.5 rounded-lg border border-slate-200 flex items-center justify-center transition-all ${currentPage === totalPages
+                  ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 cursor-pointer'
+                  }`}
               >
                 <ChevronRight size={14} />
               </button>
@@ -519,21 +514,21 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <h3 className="font-bold text-slate-800 text-sm md:text-base">
                 {currentProduct ? 'Edit Data Sembako' : 'Tambah Sembako Baru'}
               </h3>
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
                 className="p-1 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg cursor-pointer border-0 bg-transparent"
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveProduct} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Kode SKU / Barcode</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="code"
                     value={formData.code}
                     onChange={handleInputChange}
@@ -545,7 +540,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Satuan Barang</label>
-                  <select 
+                  <select
                     name="unit"
                     value={formData.unit}
                     onChange={handleInputChange}
@@ -560,8 +555,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600">Nama Barang Sembako</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -573,7 +568,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600">Kategori Sembako</label>
-                <select 
+                <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
@@ -588,8 +583,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Harga Beli Modal (Rp)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="cost"
                     value={formData.cost || ''}
                     onChange={handleInputChange}
@@ -602,8 +597,8 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-600">Harga Jual Konsumen (Rp)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="price"
                     value={formData.price || ''}
                     onChange={handleInputChange}
@@ -617,7 +612,7 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600">Deskripsi Produk (Opsional)</label>
-                <textarea 
+                <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
@@ -639,14 +634,14 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
                     )}
                   </div>
                   <div className="flex-1 space-y-1">
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       accept="image/*"
                       id="image-input"
                       onChange={handleImageChange}
                       className="hidden"
                     />
-                    <label 
+                    <label
                       htmlFor="image-input"
                       className="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer transition-colors"
                     >
@@ -658,14 +653,14 @@ export default function DataBarangView({ isLoggedIn, onNavigate }) {
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 cursor-pointer"
                 >
                   Batal
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 cursor-pointer border-0"
                 >

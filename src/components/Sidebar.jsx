@@ -1,12 +1,10 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Users, 
-  Layers, 
-  Image as ImageIcon, 
-  Lock, 
-  Unlock,
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  Layers,
+  Lock,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -54,7 +52,7 @@ export default function Sidebar({
           )}
         </div>
         {/* Collapse Button (Desktop Only) */}
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hidden md:flex p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
         >
@@ -90,16 +88,15 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative group ${
-                isActive 
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' 
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative group ${isActive
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              } ${isRestricted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${isRestricted ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={isCollapsed ? item.name : ''}
               disabled={isRestricted}
             >
               <Icon size={20} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'} />
-              
+
               {!isCollapsed && (
                 <span className="flex-1 text-left truncate">{item.name}</span>
               )}
@@ -147,23 +144,21 @@ export default function Sidebar({
     <>
       {/* Mobile Sidebar Drawer Overlay */}
       {isMobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Desktop Sidebar (Fixed Width or Collapsed) */}
-      <aside className={`hidden md:block h-screen sticky top-0 shrink-0 transition-all duration-300 ${
-        isCollapsed ? 'w-16' : 'w-64'
-      }`}>
+      <aside className={`hidden md:block h-screen sticky top-0 shrink-0 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'
+        }`}>
         {sidebarContent}
       </aside>
 
       {/* Mobile Sidebar Drawer (Slide-out) */}
-      <aside className={`fixed inset-y-0 left-0 w-64 z-50 md:hidden transition-transform duration-300 transform ${
-        isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 z-50 md:hidden transition-transform duration-300 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         {sidebarContent}
       </aside>
     </>

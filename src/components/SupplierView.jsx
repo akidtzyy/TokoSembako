@@ -35,8 +35,9 @@ export default function SupplierView({ isLoggedIn, onNavigate }) {
   });
 
   // Load suppliers
-  const loadSuppliers = () => {
-    setSuppliers(db.getSuppliers());
+  const loadSuppliers = async () => {
+    const sups = await db.getSuppliers();
+    setSuppliers(sups);
   };
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export default function SupplierView({ isLoggedIn, onNavigate }) {
     }));
   };
 
-  const handleSaveSupplier = (e) => {
+  const handleSaveSupplier = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.contact.trim()) {
       alert('Mohon isi nama supplier dan nomor kontak yang valid!');
@@ -106,20 +107,20 @@ export default function SupplierView({ isLoggedIn, onNavigate }) {
 
     if (currentSupplier) {
       // Edit
-      db.updateSupplier({
+      await db.updateSupplier({
         ...currentSupplier,
         ...formData
       });
     } else {
       // Create
-      db.addSupplier(formData);
+      await db.addSupplier(formData);
     }
 
-    loadSuppliers();
+    await loadSuppliers();
     setShowModal(false);
   };
 
-  const handleDeleteSupplier = (id) => {
+  const handleDeleteSupplier = async (id) => {
     if (!isLoggedIn) {
       alert('Anda harus login sebagai admin untuk menghapus supplier!');
       onNavigate('landing');
@@ -127,8 +128,8 @@ export default function SupplierView({ isLoggedIn, onNavigate }) {
     }
 
     if (confirm('Apakah Anda yakin ingin menghapus supplier ini? Hubungan supplier pada stok barang terkait akan diatur menjadi "Tanpa Supplier".')) {
-      db.deleteSupplier(id);
-      loadSuppliers();
+      await db.deleteSupplier(id);
+      await loadSuppliers();
     }
   };
 
